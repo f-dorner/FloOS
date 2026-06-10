@@ -133,7 +133,7 @@ char keyboard_map_alt[128] =
 
     [0x10] = '@',   // AltGr + Q
 
-    [0x12] = '$',   // AltGr + E -> später €
+    [0x12] = '$',   // AltGr + E -> maybe € later
     
     [0x1B] = '~',   // AltGr + +
 
@@ -141,7 +141,7 @@ char keyboard_map_alt[128] =
 
     [0x56] = '|',   // AltGr + <
 
-    [0x32] = 'm',   // Platzhalter für µ
+    [0x32] = 'm',   // placeholder for µ
 };
 
 static size_t write_text(char* output, size_t output_size, const char* text)
