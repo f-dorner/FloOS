@@ -1,0 +1,8 @@
+*.o
+*.bin
+*.iso
+
+disk.img
+isodir/boot/myos.bin
+
+.vscode/
