@@ -64,7 +64,7 @@ int fs_create(const char* name)
 
     for (int i = 0; i < FS_MAX_FILES; i++)
     {
-        if (entries[8].used == 1)
+        if (entries[FS_MAX_FILES - 1].used == 1)
         {
             return 2;
         }
@@ -241,7 +241,7 @@ int fs_clear(const char* name)
     return 1;
 }
 
-int fs_read(const char* name, char* out_buffer) {
+int fs_read(const char* name, char* out_buffer, uint32_t* out_size) {
     uint8_t buffer[FS_SECTOR_SIZE];
 
     disk_read_sector(FS_HEADER_SECTOR, buffer);
@@ -256,6 +256,7 @@ int fs_read(const char* name, char* out_buffer) {
             if (strcmp(entries[i].name, name) == 0)
             {
                 disk_read_sector(entries[i].start_sector, (uint8_t*) out_buffer);
+                *out_size = entries[i].size;
                 return 0;
             }
         }  

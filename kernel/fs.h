@@ -33,7 +33,7 @@ int fs_write(const char* name, const char* content);
 int fs_append(const char* name, const char* content);
 int fs_delete(const char* name, bool force);
 int fs_clear(const char* name);
-int fs_read(const char* name, char* out_buffer);
+int fs_read(const char* name, char* out_buffer, uint32_t* out_size);
 int fs_get_info(const char* name, FileEntry* out_entry);
 int fs_get_entry(int index, FileEntry* out_entry);
 

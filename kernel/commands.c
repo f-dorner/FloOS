@@ -73,8 +73,8 @@ void cmd_echo(const char* args)
     terminal_putchar('\n');
 }
 
-void cmd_ls(const char* input) {
-
+void cmd_ls(const char* input)
+{
     char cmd_name[32];
     char options[2][32];
 
@@ -119,8 +119,7 @@ void cmd_ls(const char* input) {
         return;
     }
 
-    for (int i = 0; i < FS_MAX_FILES; i++)
-    {
+    for (int i = 0; i < FS_MAX_FILES; i++) {
         FileEntry entry;
 
         //fs.c only gives the file slot, the commands.c decides what gets printed
@@ -169,8 +168,7 @@ void cmd_touch(const char* args)
 
 void cmd_write(const char* name, const char* content, const char* opt)
 {
-    if(option_is_valid("write", opt) == 0)
-    {
+    if (option_is_valid("write", opt) == 0) {
         execute_option("write", opt, name, content); 
     } else {
         int result = fs_write(name, content);
@@ -185,7 +183,7 @@ void cmd_write(const char* name, const char* content, const char* opt)
 
 void cmd_cat(const char* input)
 {
-    bool size = false;
+    bool show_size = false;
     bool hex = false;
 
     char options[2][32];
@@ -199,7 +197,7 @@ void cmd_cat(const char* input)
 
     if (option_is_valid("cat", options[0]) == 0) {
         if (strcmp(options[0], "size") == 0) {
-            size = true;
+            show_size = true;
         } else if (strcmp(options[0], "hex") == 0) {
             hex = true;
         }
@@ -207,48 +205,51 @@ void cmd_cat(const char* input)
     
     if (option_is_valid("cat", options[1]) == 0) {
         if (strcmp(options[1], "size") == 0) {
-            size = true;
+            show_size = true;
         } else if (strcmp(options[1], "hex") == 0) {
             hex = true;
         }
     }
 
     char content[FS_SECTOR_SIZE];
-    int result = fs_read(name, content);
+    uint32_t size = 0;
+
+    int result = fs_read(name, content, &size);
     
     if (result == 0) {
-        if (size == true) {
-            FileEntry entry;
-
-            if (fs_get_info(name, &entry) == 0) {
-                terminal_writestring("File size: ");
-                terminal_write_uint32_t(entry.size);
-                terminal_writestring(" bytes.");
-                terminal_putchar('\n');
-            }
+        if (show_size == true) {
+            terminal_writestring("File size: ");
+            terminal_write_uint32_t(size);
+            terminal_writestring(" bytes.");
+            terminal_putchar('\n');
         }
 
         if (hex == true) {
             //print every character byte by byte as hex
-            for (int i = 0; content[i] != '\0'; i++)
-            {
-                uint8_t byte = (uint8_t) content[i];
-                uint8_t high = (byte >> 4) & 0x0F;
-                uint8_t low = byte & 0x0F;
+            if (size == 0) {
+                //empty
+            } else {
+                for (uint32_t i = 0; i < size; i++) {
+                    uint8_t byte = (uint8_t) content[i];
+                    uint8_t high = (byte >> 4) & 0x0F;
+                    uint8_t low = byte & 0x0F;
 
-                terminal_putchar(cmd_hex_digit(high));
-                terminal_putchar(cmd_hex_digit(low));
-                terminal_putchar(' ');
+                    terminal_putchar(cmd_hex_digit(high));
+                    terminal_putchar(cmd_hex_digit(low));
+                    terminal_putchar(' ');
+                }
+
+                terminal_putchar('\n');
+                return;
             }
-
-            terminal_putchar('\n');
-            return;
         }
 
-        if (content[0] == '\0') {
+        if (size == 0) {
             //empty
         } else {
-            terminal_writestring(content);
+            for (uint32_t i = 0; i < size; i++) {
+                terminal_putchar(content[i]);
+            }
             terminal_putchar('\n');
         }
     } else {
@@ -271,8 +272,7 @@ void cmd_rm(const char* input)
 
     parser_extract_options_one_arg(input, name, options, 1);
 
-    if (option_is_valid("rm", options[0]) == 0)
-    {
+    if (option_is_valid("rm", options[0]) == 0) {
         if (strcmp(options[0], "force") == 0) {
             force = true;
         }
