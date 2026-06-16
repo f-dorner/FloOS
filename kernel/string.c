@@ -3,8 +3,10 @@
 size_t strlen(const char* str)
 {
     size_t len = 0;
-    while (str[len])
+    while (str[len]) {
         len++;
+    }
+
     return len;
 }
 
@@ -15,10 +17,8 @@ int strcmp(
 {
     int i = 0;
 
-    while(a[i] && b[i])
-    {
-        if(a[i] != b[i])
-        {
+    while (a[i] && b[i]) {
+        if (a[i] != b[i]) {
             return a[i] - b[i];
         }
 
@@ -35,8 +35,7 @@ void strcpy(
 {
     int i = 0;
 
-    while(src[i] != '\0')
-    {
+    while (src[i] != '\0') {
         dest[i] = src[i];
         i++;
     }

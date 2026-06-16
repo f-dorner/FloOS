@@ -4,6 +4,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define VGA_WIDTH   80
+#define VGA_HEIGHT  25
+#define VGA_MEMORY 0xB8000
+
+
 void terminal_initialize(void);
 void terminal_clear(void);
 void terminal_clear_row_from(size_t row, size_t start_col);
@@ -21,5 +26,6 @@ int uint32_t_len(uint32_t value);
 void terminal_set_cursor(size_t x, size_t y);
 void update_cursor(int x, int y);
 size_t terminal_get_row(void);
+size_t terminal_get_col(void);
 
 #endif

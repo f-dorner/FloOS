@@ -3,10 +3,6 @@
 #include "io.h"
 #include "string.h"
 
-#define VGA_WIDTH   80
-#define VGA_HEIGHT  25
-#define VGA_MEMORY 0xB8000
-
 size_t terminal_row;
 size_t terminal_column;
 uint8_t terminal_color;
@@ -36,8 +32,7 @@ void terminal_clear(void)
 
 void terminal_clear_row_from(size_t row, size_t start_col)
 {
-    for (size_t col = start_col; col < 80; col++)
-    {
+    for (size_t col = start_col; col < 80; col++) {
         terminal_putentryat(' ', terminal_color, col, row);
     }
 }
@@ -71,8 +66,9 @@ void terminal_putchar(char c)
         terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
         if (++terminal_column == VGA_WIDTH) {
             terminal_column = 1;
-            if (++terminal_row == VGA_HEIGHT)
+            if (++terminal_row == VGA_HEIGHT) {
                 terminal_scroll();
+            }
         }
     }
 
@@ -81,13 +77,11 @@ void terminal_putchar(char c)
 
 void terminal_scroll(void) 
 {
-    for(size_t i = VGA_WIDTH; i < (VGA_HEIGHT * VGA_WIDTH); i++) 
-    {   
+    for (size_t i = VGA_WIDTH; i < (VGA_HEIGHT * VGA_WIDTH); i++)  {   
         terminal_buffer[(i - VGA_WIDTH)] = terminal_buffer[i];
     } 
 
-    for(size_t i = ((VGA_HEIGHT - 1) * VGA_WIDTH); i < (VGA_HEIGHT * VGA_WIDTH); i++) 
-    {
+    for (size_t i = ((VGA_HEIGHT - 1) * VGA_WIDTH); i < (VGA_HEIGHT * VGA_WIDTH); i++)  {
         terminal_buffer[i] = vga_entry(' ', terminal_color);
     }
 
@@ -102,8 +96,7 @@ void terminal_write(const char* data, size_t size)
     for (size_t i = 0; i < size; i++) {
         if (data[i] != ' ' && data[i] != '\n' && data[i] != '\0') {
             j = i;
-            while (data[j] != ' ' && data[j] != '\n' && data[j] != '\0')
-            {
+            while (data[j] != ' ' && data[j] != '\n' && data[j] != '\0') {
                 j++;
             }
 
@@ -132,7 +125,8 @@ void terminal_writestring(const char* data)
     update_cursor(terminal_column, terminal_row);
 }
 
-void terminal_write_uint8_t(uint8_t data) {
+void terminal_write_uint8_t(uint8_t data)
+{
     int len = uint8_t_len(data);
     char str[len + 1];
 
@@ -147,7 +141,8 @@ void terminal_write_uint8_t(uint8_t data) {
     terminal_writestring(str);
 }
 
-void terminal_write_uint32_t(uint32_t data) {
+void terminal_write_uint32_t(uint32_t data)
+{
     int len = uint32_t_len(data);
     char str[len + 1];
 
@@ -162,11 +157,11 @@ void terminal_write_uint32_t(uint32_t data) {
     terminal_writestring(str);
 }
 
-int uint8_t_len(uint8_t value) {
+int uint8_t_len(uint8_t value)
+{
     int len = 1;
 
-    while (value >= 10)
-    {
+    while (value >= 10) {
         value = value / 10;
         len++;
     }
@@ -174,11 +169,11 @@ int uint8_t_len(uint8_t value) {
     return len;
 }
 
-int uint32_t_len(uint32_t value) {
+int uint32_t_len(uint32_t value)
+{
     int len = 1;
 
-    while (value >= 10)
-    {
+    while (value >= 10) {
         value = value / 10;
         len++;
     }
@@ -207,3 +202,8 @@ size_t terminal_get_row(void)
 {
     return terminal_row;
 }
+
+size_t terminal_get_col(void) {
+    return terminal_column;
+}
+

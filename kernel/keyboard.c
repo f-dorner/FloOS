@@ -26,8 +26,7 @@ void keyboard_read_scancode(void)
 {
     scancode = inb(0x60);
 
-    switch (scancode)
-    {
+    switch (scancode) {
         // LEFT SHIFT
         case 0x2A:
             shift_pressed = true;
@@ -92,7 +91,7 @@ void keyboard_read_scancode(void)
         sizeof(text)
     );
 
-    for(size_t i = 0; i < count; i++) {
+    for (size_t i = 0; i < count; i++) {
         shell_handle_input(text[i]);
     }
 }

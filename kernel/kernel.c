@@ -29,8 +29,7 @@ void kernel_main(void)
 
     fs_init();
 
-    while (1)
-    {
+    while (1) {
         keyboard_poll();
     }
     

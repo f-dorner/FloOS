@@ -21,8 +21,11 @@ kernel/keyboard.o: kernel/keyboard.c kernel/keyboard.h kernel/io.h kernel/termin
 kernel/keymap_de.o: kernel/keymap_de.c kernel/keymap_de.h
 	$(CC) -c kernel/keymap_de.c -o kernel/keymap_de.o $(CFLAGS)
 
-kernel/shell.o: kernel/shell.c kernel/shell.h kernel/commands.h kernel/terminal.h kernel/string.h kernel/line_editor.h
+kernel/shell.o: kernel/shell.c kernel/shell.h kernel/commands.h kernel/terminal.h kernel/line_editor.h kernel/editor.h
 	$(CC) -c kernel/shell.c -o kernel/shell.o $(CFLAGS)
+
+kernel/editor.o: kernel/editor.c kernel/editor.h kernel/terminal.h kernel/fs.h kernel/string.h
+	$(CC) -c kernel/editor.c -o kernel/editor.o $(CFLAGS)
 
 kernel/line_editor.o: kernel/line_editor.c kernel/line_editor.h kernel/terminal.h
 	$(CC) -c kernel/line_editor.c -o kernel/line_editor.o $(CFLAGS)
@@ -51,11 +54,11 @@ kernel/string.o: kernel/string.c kernel/string.h
 kernel/disk.o: kernel/disk.c kernel/disk.h kernel/io.h
 	$(CC) -c kernel/disk.c -o kernel/disk.o $(CFLAGS)
 
-kernel/option.o: kernel/option.c kernel/option.h kernel/string.h kernel/terminal.h kernel/fs.h
+kernel/option.o: kernel/option.c kernel/option.h kernel/string.h
 	$(CC) -c kernel/option.c -o kernel/option.o $(CFLAGS)
 
-myos.bin: boot/boot.o kernel/kernel.o kernel/terminal.o kernel/keyboard.o kernel/keymap_de.o kernel/shell.o kernel/line_editor.o kernel/commands.o kernel/fs.o kernel/panic.o kernel/parser.o kernel/reboot.o kernel/system_info.o kernel/string.o kernel/disk.o kernel/option.o linker.ld
-	$(CC) -T linker.ld -o myos.bin -ffreestanding -O2 -nostdlib boot/boot.o kernel/kernel.o kernel/terminal.o kernel/keyboard.o kernel/keymap_de.o kernel/shell.o kernel/line_editor.o kernel/commands.o kernel/fs.o kernel/panic.o kernel/parser.o kernel/reboot.o kernel/system_info.o kernel/string.o kernel/disk.o kernel/option.o -lgcc
+myos.bin: boot/boot.o kernel/kernel.o kernel/terminal.o kernel/keyboard.o kernel/keymap_de.o kernel/shell.o kernel/editor.o kernel/line_editor.o kernel/commands.o kernel/fs.o kernel/panic.o kernel/parser.o kernel/reboot.o kernel/system_info.o kernel/string.o kernel/disk.o kernel/option.o linker.ld
+	$(CC) -T linker.ld -o myos.bin -ffreestanding -O2 -nostdlib boot/boot.o kernel/kernel.o kernel/terminal.o kernel/keyboard.o kernel/keymap_de.o kernel/shell.o kernel/editor.o kernel/line_editor.o kernel/commands.o kernel/fs.o kernel/panic.o kernel/parser.o kernel/reboot.o kernel/system_info.o kernel/string.o kernel/disk.o kernel/option.o -lgcc
 
 myos.iso: myos.bin isodir/boot/grub/grub.cfg
 	cp myos.bin isodir/boot/myos.bin

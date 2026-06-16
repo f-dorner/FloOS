@@ -9,6 +9,7 @@
 #define FS_DATA_START_SECTOR 101
 #define FS_MAX_FILES 9
 #define FS_SECTOR_SIZE 512
+#define FS_SECTORS_PER_FILE 16
 
 typedef struct file_entry
 {
@@ -30,7 +31,6 @@ void fs_init(void);
 void fs_format(void);
 int fs_create(const char* name);
 int fs_write(const char* name, const char* content);
-int fs_append(const char* name, const char* content);
 int fs_delete(const char* name, bool force);
 int fs_clear(const char* name);
 int fs_read(const char* name, char* out_buffer, uint32_t* out_size);

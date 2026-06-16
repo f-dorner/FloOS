@@ -24,16 +24,14 @@ as some ports with a higher port number have to be used first
 
 static void disk_wait_bsy(void)
 {
-    while (inb(ATA_STATUS) & ATA_STATUS_BSY)
-    {
+    while (inb(ATA_STATUS) & ATA_STATUS_BSY) {
         
     }
 }
 
 static void disk_wait_drq(void)
 {
-    while (!(inb(ATA_STATUS) & ATA_STATUS_DRQ))
-    {
+    while (!(inb(ATA_STATUS) & ATA_STATUS_DRQ)) {
         
     }    
 }
@@ -76,8 +74,7 @@ void disk_write_sector(uint32_t lba, const uint8_t* buffer)
     //512 bytes per sector
     //512 / 2 = 256 words
     //outw() writes 2 bytes/1 word
-    for (int i = 0; i < 256; i++)
-    {
+    for (int i = 0; i < 256; i++) {
         outw(ATA_DATA, ptr[i]);
     }
 
@@ -124,8 +121,7 @@ void disk_read_sector(uint32_t lba, uint8_t* buffer)
     //512 bytes per sector
     //512 / 2 = 256 words
     // inw() reads 2 bytes/1 word
-    for(int i = 0; i < 256; i++)
-    {
+    for (int i = 0; i < 256; i++) {
         //reading one 16-bit word from the data port
         ptr[i] = inw(ATA_DATA);
     }

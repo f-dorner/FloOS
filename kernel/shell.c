@@ -2,6 +2,9 @@
 #include "commands.h"
 #include "terminal.h"
 #include "line_editor.h"
+#include "editor.h"
+
+static ShellMode shell_mode = SHELL_MODE_COMMAND;
 
 void shell_init(void)
 {
@@ -15,21 +18,30 @@ void shell_prompt(void)
 
 void shell_handle_input(char c)
 {
-    if(c == '\n') 
-    {
-        if (line_editor_length() == 0) 
-        {
+    if (shell_mode == SHELL_MODE_EDITOR) {
+        if (editor_handle_input(c) == true) {
+            shell_mode = SHELL_MODE_COMMAND;
+            shell_prompt();
+        }
+
+        return;
+    }
+
+    if (c == '\n') {
+        if (line_editor_length() == 0) {
             return;
         }
 
         terminal_putchar('\n');
         shell_execute(line_editor_text());
         line_editor_init();
-        shell_prompt();
-        return;
 
-    } else if (c == '\b') 
-    {
+        if (shell_mode == SHELL_MODE_COMMAND) {
+            shell_prompt();
+        }
+
+        return;
+    } else if (c == '\b') {
         line_editor_backspace();
         return;
     }
@@ -39,15 +51,29 @@ void shell_handle_input(char c)
 
 void shell_cursor_left(void)
 {
-    line_editor_cursor_left();
+    if (shell_mode == SHELL_MODE_EDITOR) {
+        editor_cursor_left();
+    } else {
+        line_editor_cursor_left();
+    }
 }
 
 void shell_cursor_right(void)
 {
-    line_editor_cursor_right();
+    if (shell_mode == SHELL_MODE_EDITOR) {
+        editor_cursor_right();
+    } else {
+        line_editor_cursor_right();
+    }
 }
 
 void shell_execute(const char* input)
 {
     cmd_exec(input);
+}
+
+void shell_enter_editor(const char* filename)
+{
+    shell_mode = SHELL_MODE_EDITOR;
+    editor_open(filename);
 }

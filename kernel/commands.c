@@ -23,6 +23,48 @@ static char cmd_hex_digit(uint8_t value)
     return 'A' + (value - 10);
 }
 
+static void cmd_cat_print_hex(const char* content, uint32_t size) 
+{
+    //print every character byte by byte as hex
+    if (size == 0) {
+        //empty
+    } else {
+        for (uint32_t i = 0; i < size; i++) {
+            if (i > 0) {
+                if ((i % 16) == 0) {
+                    terminal_putchar('\n');
+                } else {
+                    terminal_putchar(' ');
+                }
+            }
+
+            uint8_t byte = (uint8_t) content[i];
+            uint8_t high = (byte >> 4) & 0x0F;
+            uint8_t low = byte & 0x0F;
+
+            terminal_putchar(cmd_hex_digit(high));
+            terminal_putchar(cmd_hex_digit(low));
+        }
+
+        terminal_putchar('\n');
+        return;
+    }
+}
+
+static void cmd_cat_print_content(const char* content, uint32_t size)
+{
+    int col = 0;
+    for (uint32_t i = 0; i < size; i++) {
+        terminal_putchar(content[i]);
+        col++;
+        if (col >= 71) {
+            terminal_set_cursor(0, terminal_get_row() + 1);
+            col = 0;
+        }
+    }
+    terminal_putchar('\n');
+}
+
 void cmd_help(const char* input)
 {
     char name[32];
@@ -34,15 +76,11 @@ void cmd_help(const char* input)
 
     parser_extract_options_no_args(input, name, cmd_options, 1);
 
-    if (option_is_valid("help", cmd_options[0]) == 0)
-    {
-        if (strcmp(cmd_options[0], "options") == 0)
-        {
+    if (option_is_valid("help", cmd_options[0]) == 0) {
+        if (strcmp(cmd_options[0], "options") == 0) {
             options = true;
         }
-        
     }
-    
 
     system_print_command_list(options);
 }
@@ -107,7 +145,7 @@ void cmd_ls(const char* input)
         all = false;
         long_format = false;
     } else if (input[2] == ' ' && input[3] == '-' && input[4] == '-') {
-        if (input[5] == '\0'){
+        if (input[5] == '\0') {
             terminal_writestring("No option specified.\n");
             return;
         } else if (input[5] != '\0' && all == false && long_format == false) {
@@ -166,17 +204,36 @@ void cmd_touch(const char* args)
     }
 }
 
-void cmd_write(const char* name, const char* content, const char* opt)
+void cmd_write(const char* input)
 {
-    if (option_is_valid("write", opt) == 0) {
-        execute_option("write", opt, name, content); 
+    char options[1][32];
+    char name[32];
+
+    options[0][0] = '\0';
+
+    parser_extract_options_one_arg(input, name, options, 1);
+
+    if (option_is_valid("write", options[0]) == 0) {
+        if (strcmp(options[0], "clear") == 0) {
+            int result = fs_clear(name);
+            if (result == 0) {
+                terminal_writestring("File content cleared successfully.\n");
+            } else {
+                terminal_writestring("File not found!\n");
+            }
+        }
     } else {
-        int result = fs_write(name, content);
-        
-        if (result == 0) {
-            terminal_writestring("File edited successfully.\n");
+        int pos = 6; //after "write "
+        while (input[pos] != ' ' && input[pos] != '\0') {
+            pos++;
+        }
+
+        if (input[pos] == ' ' && input[pos + 1] != '-' && input[pos + 2] != '-') {
+            terminal_writestring("Invalid syntax!\n");
+        } else if (input[pos] == ' ' && input[pos + 1] == '-' && input[pos + 2] == '-') {
+            terminal_writestring("Unknown option!\n");
         } else {
-            terminal_writestring("File could not be edited!\n");
+            shell_enter_editor(name);
         }
     }
 }
@@ -195,6 +252,24 @@ void cmd_cat(const char* input)
     //cat needs a filename and can have options after that
     parser_extract_options_one_arg(input, name, options, 2);
 
+    int pos = 4;
+    while (input[pos] != ' ' && input[pos] != '\0') {
+        pos++;
+    }
+
+    if (input[pos] == ' ') {
+        if (input[pos + 1] == '-' && input[pos + 2] == '-') {
+            if ((options[0][0] != '\0' && option_is_valid("cat", options[0]) != 0) ||
+                (options[1][0] != '\0' && option_is_valid("cat", options[1]) != 0)) {
+                terminal_writestring("Unknown option!\n");
+                return;
+            }
+        } else {
+            terminal_writestring("Invalid syntax!\n");
+            return;
+        }
+    }
+
     if (option_is_valid("cat", options[0]) == 0) {
         if (strcmp(options[0], "size") == 0) {
             show_size = true;
@@ -211,7 +286,7 @@ void cmd_cat(const char* input)
         }
     }
 
-    char content[FS_SECTOR_SIZE];
+    char content[FS_SECTOR_SIZE * FS_SECTORS_PER_FILE];
     uint32_t size = 0;
 
     int result = fs_read(name, content, &size);
@@ -225,39 +300,17 @@ void cmd_cat(const char* input)
         }
 
         if (hex == true) {
-            //print every character byte by byte as hex
-            if (size == 0) {
-                //empty
-            } else {
-                for (uint32_t i = 0; i < size; i++) {
-                    uint8_t byte = (uint8_t) content[i];
-                    uint8_t high = (byte >> 4) & 0x0F;
-                    uint8_t low = byte & 0x0F;
-
-                    terminal_putchar(cmd_hex_digit(high));
-                    terminal_putchar(cmd_hex_digit(low));
-                    terminal_putchar(' ');
-                }
-
-                terminal_putchar('\n');
-                return;
-            }
+            cmd_cat_print_hex(content, size);
+            return;
         }
 
         if (size == 0) {
             //empty
         } else {
-            for (uint32_t i = 0; i < size; i++) {
-                terminal_putchar(content[i]);
-            }
-            terminal_putchar('\n');
+            cmd_cat_print_content(content, size);
         }
     } else {
-        if(input[12] != '\0') {
-            terminal_writestring("Invalid syntax!\n");
-        } else {
-            terminal_writestring("File not found!\n");
-        }
+        terminal_writestring("File not found!\n");
     }
 }
 
@@ -272,6 +325,23 @@ void cmd_rm(const char* input)
 
     parser_extract_options_one_arg(input, name, options, 1);
 
+    int pos = 3;
+    while (input[pos] != ' ' && input[pos] != '\0') {
+        pos++;
+    }
+
+    if (input[pos] == ' ') {
+        if (input[pos + 1] == '-' && input[pos + 2] == '-') {
+            if (options[0][0] != '\0' && option_is_valid("rm", options[0]) != 0) {
+                terminal_writestring("Unknown option!\n");
+                return;
+            }
+        } else {
+            terminal_writestring("Invalid syntax!\n");
+            return;
+        }
+    }
+
     if (option_is_valid("rm", options[0]) == 0) {
         if (strcmp(options[0], "force") == 0) {
             force = true;
@@ -285,19 +355,8 @@ void cmd_rm(const char* input)
     } else if (result == 1) {
         terminal_writestring("File not found!\n");
     } else if (result == 2) {
-        
+        //empty
     }
-}
-
-void cmd_write_from_input(const char* input)
-{
-    char name[32];
-    char content[128];
-    char opt[128];
-
-    parser_extract_args(input, name, content, opt);
-
-    cmd_write(name, content, opt);
 }
 
 void cmd_exec(const char* input)
@@ -317,10 +376,10 @@ void cmd_exec(const char* input)
     } else if (parser_starts_with(input, "touch ")) {
         cmd_touch(input + 6);
     } else if (parser_starts_with(input, "write ")) {
-        cmd_write_from_input(input + 6);
+        cmd_write(input);
     } else if (parser_starts_with(input, "cat ")) {
         cmd_cat(input);
-    } else if(parser_starts_with(input, "rm ")) {
+    } else if (parser_starts_with(input, "rm ")) {
         cmd_rm(input);
     } else if (strcmp(input, "help") == 0 || parser_starts_with(input, "help ")) {
         cmd_help(input);

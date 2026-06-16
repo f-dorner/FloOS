@@ -148,14 +148,12 @@ static size_t write_text(char* output, size_t output_size, const char* text)
 {
     size_t i = 0;
 
-    while (text[i] && i + 1 < output_size)
-    {
+    while (text[i] && i + 1 < output_size) {
         output[i] = text[i];
         i++;
     }
 
-    if (output_size > 0)
-    {
+    if (output_size > 0) {
         output[i] = '\0';
     }
 
@@ -171,15 +169,13 @@ size_t keymap_de_translate(
 )
 {
 
-    if (output_size == 0)
-    {
+    if (output_size == 0) {
         return 0;
     }
 
     output[0] = '\0';
  
-    if (!shift && !alt) 
-    {
+    if (!shift && !alt)  {
         if (scancode == 0x1A) return write_text(output, output_size, "ue");
         if (scancode == 0x27) return write_text(output, output_size, "oe");
         if (scancode == 0x28) return write_text(output, output_size, "ae");
@@ -188,8 +184,7 @@ size_t keymap_de_translate(
 
     char c;
 
-    if (alt) 
-    {
+    if (alt)  {
         c = keyboard_map_alt[scancode];
     } else if (shift) {
         c = keyboard_map_shift[scancode];

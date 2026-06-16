@@ -40,8 +40,7 @@ void line_editor_redraw_input(void)
 
 void line_editor_backspace(void)
 {
-    if (input_cursor > 0)
-    {
+    if (input_cursor > 0) {
         for (int i = input_cursor - 1; i < input_length; i++) {
             input_buffer[i] = input_buffer[i + 1];
         }
@@ -54,8 +53,7 @@ void line_editor_backspace(void)
 
 void line_editor_insert(char c)
 {
-    if (input_length < INPUT_BUFFER_SIZE - 1 && input_length < INPUT_MAX_LENGTH)
-    {
+    if (input_length < INPUT_BUFFER_SIZE - 1 && input_length < INPUT_MAX_LENGTH) {
         for (int i = input_length; i > input_cursor; i--) {
             input_buffer[i] = input_buffer[i - 1];
         }

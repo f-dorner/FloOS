@@ -13,8 +13,7 @@ void system_print_boot_message(void)
 void system_print_command_list(bool options)
 {
 
-    if (options == true)
-    {
+    if (options == true) {
             terminal_writestring("List of commands with options:\n");
             terminal_writestring("------------------------------\n");
 
@@ -47,13 +46,15 @@ void system_print_command_list(bool options)
             terminal_putchar('\n');
 
             terminal_writestring("write     ");
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 1; i++) {
                 terminal_writestring("--");
                 terminal_writestring(write_options[i]);
 
+                /*
                 if (i != 1) {
                     terminal_writestring(", ");
                 }
+                */
             }
 
             terminal_putchar('\n');
